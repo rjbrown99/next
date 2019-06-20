@@ -1,0 +1,39 @@
+{\rtf0\ansi{\fonttbl\f0\fswiss Helvetica;\f1\fmodern Ohlfs;}
+\paperw9840
+\paperh8400
+\margl120
+\margr120
+\pard\tx520\tx1060\tx1600\tx2120\tx2660\tx3200\tx3720\tx4260\tx4800\tx5320\f0\b\i0\ulnone\fs24\fc0\cf0 OS42HeadersFix for OPENSTEP 4.2, version 1.0
+\b0 \
+\
+This package replaces the NeXT supplied system headers to disable the ARCH_INCLUDE() macro.  This allows the GCC 3 pre-processor (as well as the NeXT CC pre-processor) to function correctly and select the architecture dependent include files.  No other changes were made to the NeXT supplied headers.\
+\
+The modification is accomplished by replacing the following example macro:\
+\
+
+\i #include <architecture/ARCH_INCLUDE.h>\
+#include ARCH_INCLUDE(ansi/, float.h)\
+
+\i0 \
+with:\
+\
+
+\i #ifdef m68k \
+#include <ansi/m68k/float.h>\
+#elif defined i386\
+#include <ansi/i386/float.h>\
+#elif defined hppa\
+#include <ansi/hppa/float.h>\
+#elif defined sparc\
+#include <ansi/sparc/float.h>\
+#endif /* m68k */\
+
+\i0 \
+During the installation, all the original NeXT supplied headers are backed-up into the package receipt directory.  This backup is automatically restored when the package is subsequently deleted or compressed.  \
+\
+Note that the precompiled header files are not included in this package, so compilation with the NeXT supplied CC will be somewhat slower.\
+\
+Install only on OPENSTEP 4.2 Developer system.\
+\
+Created and packaged by t-rexky.
+}

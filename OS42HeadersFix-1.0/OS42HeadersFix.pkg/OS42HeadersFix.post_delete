@@ -1,0 +1,35 @@
+#!/bin/sh
+
+#set-up the environment
+PATH=/bin:/usr/bin:/usr/ucb:/etc
+
+workpath=`echo "$0" | sed 's:[^/]*$::;s://*$::'`
+devpath="/NextDeveloper"
+backup="OS42HeadersFix.OriginalHeaders.tar.gz"
+
+#cleanup the screen
+echo
+
+# do some basic error checks
+if [ ! -d $devpath ]; then
+    echo "    Cannot find the $devpath directory, aborting!"
+    exit 1
+fi
+if [ ! -f "$workpath"/"$backup" ]; then
+    echo "    No header backup file in the package directory, aborting!"
+    exit 1
+fi
+
+# restore the backup
+echo "    Restoring the backup of the original headers..."
+echo "    (using Installer.app working directory: $workpath)"
+cd $devpath
+gnutar -xzf "$workpath"/"$backup"
+
+# delete the backup
+echo "    Deleting the backup of the original headers..."
+rm -f "$workpath"/"$backup"
+
+# we are done
+echo "    Package deletion is complete."
+exit 0
