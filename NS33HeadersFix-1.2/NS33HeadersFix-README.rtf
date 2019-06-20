@@ -1,0 +1,93 @@
+{\rtf0\ansi{\fonttbl\f0\fswiss Helvetica;\f3\fmodern Ohlfs;}
+\paperw9840
+\paperh8400
+\margl120
+\margr120
+\pard\tx520\tx1060\tx1600\tx2120\tx2660\tx3200\tx3720\tx4260\tx4800\tx5320\f0\b\i0\ulnone\fs24\fc0\cf0 NS33HeadersFix for NEXTSTEP 3.3, version 1.2
+\b0 \
+\
+
+\b 1. Purpose
+\b0 \
+\
+This package replaces the NeXT supplied system headers to disable the ARCH_INCLUDE() macro.  This allows the GCC 3 and GCC 4 pre-processor (in addition to the NeXT CC pre-processor) to correctly select the architecture dependent include files.  The modification is accomplished by replacing the following macro in each applicable header file:\
+\
+
+\i #include <architecture/ARCH_INCLUDE.h>\
+#include ARCH_INCLUDE(ansi/, float.h)\
+
+\i0 \
+with the following (equivalent) code:\
+\
+
+\i #if defined(__m68k__) \
+#include <ansi/m68k/float.h>\
+#elif defined(__i386__)\
+#include <ansi/i386/float.h>\
+#elif defined(__hppa__)\
+#include <ansi/hppa/float.h>\
+#elif defined(__sparc__)\
+#include <ansi/sparc/float.h>\
+#endif /* __m68k__ */\
+
+\i0 \
+
+\b 2.1 Additional changes in version 1.1 (build 2012-04-21)
+\b0 \
+\
+Version 1.1 introduces the leading and trailing underscores to the architecture names in order to maintain ANSI compliance.\
+\
+Note, however, that some of the original NeXT supplied headers use architecture names without the underscores.  These will fail to be picked-up by the pre-processor when gcc is run with the 
+\i -ansi
+\i0  flag (the exact same behaviour will take place when the NeXT cc is run with the 
+\i -ansi
+\i0  flag).  The implicated headers are:\
+\
+appkit/afm.h\
+appkit/Text.h\
+bsd/dev/ev_keymap.h\
+bsd/dev/ev_types.h\
+bsd/dev/fd_extern.h\
+bsd/dev/ldd.h\
+bsd/dev/scsireg.h\
+bsd/softdes.h\
+bsd/sys/buf.h\
+bsd/sys/param.h\
+bsd/sys/user.h\
+kernserv/prototypes.h\
+\
+
+\b 2.2 Additional changes in version 1.2 (build 2014-11-01)
+\b0 \
+\
+Version 1.2 replaces the pre/post_install and pre/post_delete scripts with slightly more intelligent versions.  In adition, the presence stamp location has been changed from NextDeveloper/Headers to NextLibrary/Receipts/.syspatch-stamps in order to standardize the location for all system patches.\
+
+\b  \
+WARNING:\
+\
+If version 1.2 is installed on a system with version 1.0 or 1.1 already installed, the backup of the original NeXT system headers will be lost due to the change in the presence stamp location!  Version 1.0 or 1.1 of this patch 
+\ul must be deleted first
+\ulnone  through Installer.app before version 1.2 is installed.\
+
+\b0 \
+
+\b 3. Installation and automatic Headers backup
+\b0 \
+\
+During the installation, all the original NeXT supplied headers are backed-up into the package receipt directory.  This backup is automatically restored when the package is subsequently deleted or compressed.\
+\
+When installing over a previously installed NS33HeadersFix package, first open the package Receipt located in /NextLibrary/Receipts and select 
+\i Delete
+\i0 .  This will delete the old package and restore the original NeXT supplied headers.  New version of NS33HeadersFix can then be installed.\
+\
+
+\b 4. Limitations\
+
+\b0 \
+Note that the precompiled header files are not included in this package, so compilation with the NeXT supplied CC will become somewhat slower.\
+\
+Install only on NEXTSTEP 3.3 Developer system and use at your own risk!\
+\
+Created and packaged by t-rexky\
+2014-11-01
+}

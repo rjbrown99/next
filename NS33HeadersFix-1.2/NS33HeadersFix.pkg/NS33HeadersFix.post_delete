@@ -1,0 +1,75 @@
+#!/bin/sh
+#
+# This attempts to be a "generic" script for managing NeXT Installer.app
+# packages that replace original NEXTSTEP system files.  The four scripts
+# work together to create a backup of the original files in the package
+# directory prior to installation and optionally delete specified original
+# files.  When the package is deleted or compressed using Installer.app,
+# the original files are automatically restored from the backup.
+#
+# 2013-02-18
+# t-rexky
+#
+# This version was modified specifically to support the NS33HeadersFix.pkg
+# such that the auto-delete feature uses 'rm -rf' as opposed to 'rm -f'
+# in order to work on list of paths as opposed to list of individual files.
+# This preserves the original directory dates when this package is deleted. 
+
+
+# set-up the environment
+PATH=/bin:/usr/bin:/usr/ucb:/etc:/usr/etc
+
+# who and where are we
+pkgdir=$1
+destdir=`echo "$2" | sed 's:/*$::'`
+package=`basename "$pkgdir" .pkg`
+workpath=`echo "$0" | sed 's:[^/]*$::;s://*$::'`
+
+# where to install the presence stamp
+stampdir=".syspatch-stamps"
+stamppath="/NextLibrary/Receipts/$stampdir"
+stamp="$package.stamp"
+
+files="$package.original_paths_to_backup"
+delete="$package.original_paths_to_delete"
+backup="$package.original_files_backup.tar.gz"
+
+# cleanup the screen
+echo
+
+# if we are compressed, there is nothing else to do here and we are done
+if [ -f "$workpath"/"$package.status" ]; then
+    if [ `cat "$workpath"/"$package.status"` = "compressed" ]; then
+        echo "    Package deletion is complete."
+        exit 0
+    fi
+fi
+
+# if there is no backup found at this point, then we are in deep trouble
+# (this should never happen though, since we check for it in pre_delete)
+if [ ! -f "$workpath"/"$backup" ]; then
+    echo "    No backup file found in the package directory, aborting!"
+    echo "    (original files could not be restored and are missing)"
+    exit 1
+fi
+
+# delete the old Headers paths to preserves their original dates on restore
+if [ -f "$pkgdir"/"$delete" ]; then
+    if [ ! -f "$workpath"/"$delete" ]; then
+        cp -p "$pkgdir"/"$delete" "$workpath"/"$delete"
+    fi
+    rm -rf `cat "$workpath"/"$delete"`
+fi
+
+# restore the backup
+echo "    Restoring the backup of the original files, please wait..."
+echo "    (using Installer.app working directory: $workpath)"
+gnutar -xzPf "$workpath"/"$backup"
+
+# now delete the backup
+echo "    Deleting the backup of the original files..."
+rm -f "$workpath"/"$backup"
+
+# we are finally done
+echo "    Package deletion is complete."
+exit 0

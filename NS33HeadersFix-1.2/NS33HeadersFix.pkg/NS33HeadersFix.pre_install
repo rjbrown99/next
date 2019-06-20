@@ -1,0 +1,77 @@
+#!/bin/sh
+#
+# This attempts to be a "generic" script for managing NeXT Installer.app
+# packages that replace original NEXTSTEP system files.  The four scripts
+# work together to create a backup of the original files in the package
+# directory prior to installation and optionally delete specified original
+# files.  When the package is deleted or compressed using Installer.app,
+# the original files are automatically restored from the backup.
+#
+# 2013-02-18
+# t-rexky
+#
+# This version was modified specifically to support the NS33HeadersFix.pkg
+# such that the auto-delete feature uses 'rm -rf' as opposed to 'rm -f'
+# in order to work on list of paths as opposed to list of individual files.
+# This preserves the original directory dates when this package is deleted. 
+
+
+# set-up the environment
+PATH=/bin:/usr/bin:/usr/ucb:/etc:/usr/etc
+
+# who and where are we
+pkgdir=$1
+destdir=`echo "$2" | sed 's:/*$::'`
+package=`basename "$pkgdir" .pkg`
+workpath=`echo "$0" | sed 's:[^/]*$::;s://*$::'`
+
+# where to install the presence stamp
+stampdir=".syspatch-stamps"
+stamppath="/NextLibrary/Receipts/$stampdir"
+stamp="$package.stamp"
+
+files="$package.original_paths_to_backup"
+delete="$package.original_paths_to_delete"
+backup="$package.original_files_backup.tar.gz"
+
+# cleanup the screen
+echo
+
+# do some basic error checks
+if [ -f "$stamppath"/"$stamp" ]; then
+    echo "    This package has already been installed, aborting!"
+    exit 1
+fi
+if [ -f "$workpath"/"$backup" ]; then
+    echo "    Original file backup already exists, aborting!"
+    exit 1
+fi
+
+# if no backup file list given, make our own (with absolute path)
+if [ ! -f "$pkgdir"/"$files" ]; then
+    echo "    List of files to backup not found, creating one from BOM..."
+    lsbom -f -l -s "$workpath"/"$package.bom" | sed "s|^\./|$destdir/|" \
+        > "$workpath"/"$files"
+else
+    if [ ! -f "$workpath"/"$files" ]; then
+        cp -p "$pkgdir"/"$files" "$workpath"/"$files"
+    fi
+fi
+
+# now do the backup
+echo "    Creating a backup of the original files, please wait..."
+echo "    (using Installer.app working directory: $workpath)"
+gnutar -czPf "$workpath"/"$backup" -T "$workpath"/"$files"
+
+# check to see if we were requested to auto-delete some files
+if [ -f "$pkgdir"/"$delete" ]; then
+    echo "    Deletion of some original files requested, deleting..."
+    if [ ! -f "$workpath"/"$delete" ]; then
+        cp -p "$pkgdir"/"$delete" "$workpath"/"$delete"
+    fi
+    rm -rf `cat "$workpath"/"$delete"`
+fi
+
+# and finally proceed with package installation
+echo "    Proceeding with package installation..."
+exit 0

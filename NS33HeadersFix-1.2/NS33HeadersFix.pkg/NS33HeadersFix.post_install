@@ -1,0 +1,50 @@
+#!/bin/sh
+#
+# This attempts to be a "generic" script for managing NeXT Installer.app
+# packages that replace original NEXTSTEP system files.  The four scripts
+# work together to create a backup of the original files in the package
+# directory prior to installation and optionally delete specified original
+# files.  When the package is deleted or compressed using Installer.app,
+# the original files are automatically restored from the backup.
+#
+# 2013-02-18
+# t-rexky
+#
+# This version was modified specifically to support the NS33HeadersFix.pkg
+# such that the auto-delete feature uses 'rm -rf' as opposed to 'rm -f'
+# in order to work on list of paths as opposed to list of individual files.
+# This preserves the original directory dates when this package is deleted. 
+
+
+# set-up the environment
+PATH=/bin:/usr/bin:/usr/ucb:/etc:/usr/etc
+
+# who and where are we
+pkgdir=$1
+destdir=`echo "$2" | sed 's:/*$::'`
+package=`basename "$pkgdir" .pkg`
+workpath=`echo "$0" | sed 's:[^/]*$::;s://*$::'`
+
+# where to install the presence stamp
+stampdir=".syspatch-stamps"
+stamppath="/NextLibrary/Receipts/$stampdir"
+stamp="$package.stamp"
+
+files="$package.original_paths_to_backup"
+delete="$package.original_paths_to_delete"
+backup="$package.original_files_backup.tar.gz"
+
+# cleanup the screen
+echo
+
+# install a stamp to prevent multiple installations and loss of original backup
+echo "    Instaling presence stamp to prevent multiple installations..."
+if [ ! -d "$stamppath" ]; then
+    echo "    (creating $stamppath directory first)"
+    mkdirs "$stamppath"
+fi
+date > "$stamppath"/"$stamp"
+
+# we are done
+echo "    Package installation is complete."
+exit 0
