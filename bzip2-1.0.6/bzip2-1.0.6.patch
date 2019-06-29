@@ -1,0 +1,18 @@
+diff -Naur bzip2-1.0.6/Makefile bzip2-1.0.6.patched/Makefile
+--- bzip2-1.0.6/Makefile	Fri Sep 10 15:46:02 2010
++++ bzip2-1.0.6.patched/Makefile	Sat Jun 29 15:25:10 2019
+@@ -20,11 +20,11 @@
+ RANLIB=ranlib
+ LDFLAGS=
+ 
+-BIGFILES=-D_FILE_OFFSET_BITS=64
+-CFLAGS=-Wall -Winline -O2 -g $(BIGFILES)
++#BIGFILES=-D_FILE_OFFSET_BITS=64
++CFLAGS=-Wall -Winline -O2 -g -D_POSIX_SOURCE $(BIGFILES)
+ 
+ # Where you want it installed when you do 'make install'
+-PREFIX=/usr/local
++PREFIX=/storage2/opt
+ 
+ 
+ OBJS= blocksort.o  \
