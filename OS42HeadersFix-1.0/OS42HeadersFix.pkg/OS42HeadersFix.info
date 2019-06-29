@@ -1,7 +1,0 @@
-Title		OPENSTEP 4.2 Developer Headers Fix
-Version		1.0 (build 2011-12-12)
-Description	This package replaces the NeXT supplied system headers to disable the ARCH_INCLUDE() macro for GCC 3 pre-processor compatibility.  The original headers are backed-up prior to installation into the package receipt directory.  The backup is restored when this package is uninstalled.  Install only on OPENSTEP 4.2 Developer system.
-DefaultLocation	/NextDeveloper
-Diskname	OS42HeadersFix
-Relocatable	NO
-Application	NO

@@ -1,7 +1,0 @@
-Title		NEXTSTEP 3.3 Developer Headers Fix
-Version		1.2 (build 2014-11-01)
-Description	This package replaces the NeXT supplied system headers in order to disable the ARCH_INCLUDE() macro for GCC 3 and GCC 4 pre-processor compatibility.  The original headers are backed-up into the package receipt directory and the backup is automatically restored when this package is deleted or compressed.  NeXT precompiled header files are not included.  Install only on NEXTSTEP 3.3 Developer system.
-DefaultLocation	/NextDeveloper
-Diskname	NS33HeadersFix
-Relocatable	NO
-Application	NO
