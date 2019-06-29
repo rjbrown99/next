@@ -1,0 +1,50 @@
+diff -ur gcc-2.95.3/gcc/config/i386/i386.c gcc-2.95.3.i386-next-nextstep3/gcc/config/i386/i386.c
+--- gcc-2.95.3/gcc/config/i386/i386.c	1999-09-07 03:38:56.000000000 -0400
++++ gcc-2.95.3.i386-next-nextstep3/gcc/config/i386/i386.c	2003-08-16 06:13:14.000000000 -0400
+@@ -3360,7 +3360,7 @@
+ 	  if (GET_CODE (x) == CONST_INT || ! SHIFT_DOUBLE_OMITS_COUNT)
+ 	    {
+ 	      PRINT_OPERAND (file, x, 0);
+-	      fputs (AS2C (,) + 1, file);
++	      fputs (AS2C (" "," ") + 1, file);
+ 	    }
+ 
+ 	  return;
+diff -ur gcc-2.95.3/gcc/f/global.c gcc-2.95.3.i386-next-nextstep3/gcc/f/global.c
+--- gcc-2.95.3/gcc/f/global.c	1999-03-27 05:23:48.000000000 -0500
++++ gcc-2.95.3.i386-next-nextstep3/gcc/f/global.c	2003-08-20 01:32:50.000000000 -0400
+@@ -62,14 +62,14 @@
+ static ffenameSpace ffeglobal_filewide_ = NULL;
+ static const char *ffeglobal_type_string_[] =
+ {
+-  [FFEGLOBAL_typeNONE] "??",
+-  [FFEGLOBAL_typeMAIN] "main program",
+-  [FFEGLOBAL_typeEXT] "external",
+-  [FFEGLOBAL_typeSUBR] "subroutine",
+-  [FFEGLOBAL_typeFUNC] "function",
+-  [FFEGLOBAL_typeBDATA] "block data",
+-  [FFEGLOBAL_typeCOMMON] "common block",
+-  [FFEGLOBAL_typeANY] "?any?"
++  "??",
++  "main program",
++  "external",
++  "subroutine",
++  "function",
++  "block data",
++  "common block",
++  "?any?"
+ };
+ #endif
+ 
+diff -ur gcc-2.95.3/libstdc++/std/complext.h gcc-2.95.3.i386-next-nextstep3/libstdc++/std/complext.h
+--- gcc-2.95.3/libstdc++/std/complext.h	1997-09-28 15:21:47.000000000 -0400
++++ gcc-2.95.3.i386-next-nextstep3/libstdc++/std/complext.h	2003-08-13 21:42:34.000000000 -0400
+@@ -311,7 +311,7 @@
+ }
+ 
+ // Some targets don't provide a prototype for hypot when -ansi.
+-extern "C" double hypot (double, double) __attribute__ ((const));
++extern "C" const double hypot (double, double) __attribute__ ((const));
+ 
+ template <class _FLT> inline _FLT
+ abs (const complex<_FLT>& x) __attribute__ ((const));
