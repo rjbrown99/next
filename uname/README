@@ -1,4 +1,8 @@
-An implementation of uname for NeXTStep and Openstep.
+An implementation of uname for NeXTStep, OpenStep, and Rhapsody.
 
-Source:
+Original source:
 http://www.nextcomputers.org/forums/index.php?topic=667.msg13898#msg13898
+
+Directions:
+make
+make install
