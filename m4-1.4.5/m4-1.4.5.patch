@@ -1,0 +1,43 @@
+diff -Naur m4-1.4.5/src/builtin.c m4-1.4.5.patched/src/builtin.c
+--- m4-1.4.5/src/builtin.c	Fri Jul 14 13:15:46 2006
++++ m4-1.4.5.patched/src/builtin.c	Tue Jul  2 20:23:49 2019
+@@ -884,9 +884,7 @@
+ static void
+ m4_sysval (struct obstack *obs, int argc, token_data **argv)
+ {
+-  shipout_int (obs, (sysval == -1 ? 127
+-		     : (M4SYSVAL_EXITBITS (sysval)
+-			| M4SYSVAL_TERMSIGBITS (sysval))));
++  shipout_int (obs, (sysval >> 8) & 0xff);
+ }
+ 
+ /*-------------------------------------------------------------------------.
+diff -Naur m4-1.4.5/src/stackovf.c m4-1.4.5.patched/src/stackovf.c
+--- m4-1.4.5/src/stackovf.c	Thu Jun 29 20:46:14 2006
++++ m4-1.4.5.patched/src/stackovf.c	Wed Jul  3 10:16:01 2019
+@@ -379,7 +379,11 @@
+   act.sa_handler = (RETSIGTYPE (*) _((int))) sigsegv_handler;
+ # endif /* ! HAVE_STRUCT_SIGACTION_SA_SIGACTION */
+   sigemptyset (&act.sa_mask);
+-  act.sa_flags = (SA_ONSTACK | SA_RESETHAND | SA_SIGINFO);
++  act.sa_flags = (SA_ONSTACK
++#ifdef SA_RESETHAND
++                  | SA_RESETHAND
++#endif
++                  | SA_SIGINFO);
+   if (sigaction (SIGSEGV, &act, NULL) < 0)
+     error (EXIT_FAILURE, errno, "sigaction");
+ 
+@@ -387,7 +391,11 @@
+ 
+   vec.sv_handler = (RETSIGTYPE (*)_ ((int))) sigsegv_handler;
+   vec.sv_mask = 0;
+-  vec.sv_flags = (SV_ONSTACK | SV_RESETHAND);
++  vec.sv_flags = (SV_ONSTACK 
++#ifdef SV_RESETHAND
++                  | SV_RESETHAND
++#endif
++                 );
+   if (sigvec (SIGSEGV, &vec, NULL) < 0)
+     error (EXIT_FAILURE, errno, "sigvec");
+ 

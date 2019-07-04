@@ -1,0 +1,60 @@
+diff -Naur bash-3.2.57/jobs.c bash-3.2.57.patched/jobs.c
+--- bash-3.2.57/jobs.c	Tue Apr 29 18:24:51 2008
++++ bash-3.2.57.patched/jobs.c	Thu Jul  4 13:52:57 2019
+@@ -2248,6 +2248,7 @@
+ {
+   register PROCESS *p;
+   int fail;
++  WAIT ret;
+ 
+   if (pipefail_opt)
+     {
+@@ -2255,11 +2256,13 @@
+       p = jobs[job]->pipe;
+       do
+ 	{
+-	  if (p->status != EXECUTION_SUCCESS) fail = p->status;
++	  if (WSTATUS(p->status) != EXECUTION_SUCCESS)
++                 fail = WSTATUS(p->status);
+ 	  p = p->next;
+ 	}
+       while (p != jobs[job]->pipe);
+-      return fail;
++      WSTATUS(ret) = fail;
++      return ret;
+     }
+ 
+   for (p = jobs[job]->pipe; p->next != jobs[job]->pipe; p = p->next)
+@@ -2400,7 +2403,7 @@
+ 	  if (r == -1 && errno == ECHILD)
+ 	    {
+ 	      child->running = PS_DONE;
+-	      child->status = 0;	/* XXX -- can't find true status */
++	      WSTATUS(child->status) = 0;	/* XXX -- can't find true status */
+ 	      js.c_living = 0;		/* no living child processes */
+ 	      if (job != NO_JOB)
+ 		{
+diff -Naur bash-3.2.57/lib/readline/rltty.c bash-3.2.57.patched/lib/readline/rltty.c
+--- bash-3.2.57/lib/readline/rltty.c	Mon Dec 26 14:21:50 2005
++++ bash-3.2.57.patched/lib/readline/rltty.c	Thu Jul  4 13:55:05 2019
+@@ -862,7 +862,7 @@
+ }
+ 
+ #define RESET_SPECIAL(c) \
+-  if (c != -1 && kmap[(unsigned char)c].type == ISFUNC)
++  if (c != -1 && kmap[(unsigned char)c].type == ISFUNC) \
+     kmap[(unsigned char)c].function = rl_insert;
+ 
+ static void
+diff -Naur bash-3.2.57/nojobs.c bash-3.2.57.patched/nojobs.c
+--- bash-3.2.57/nojobs.c	Wed Jan 25 07:03:47 2006
++++ bash-3.2.57.patched/nojobs.c	Thu Jul  4 13:55:34 2019
+@@ -232,7 +232,7 @@
+     return (0);
+   if (pid_list[i].flags & PROC_RUNNING)
+     return (0);
+-  return (get_termsig (pid_list[i].status));
++  return (get_termsig ((WAIT)pid_list[i].status));
+ }
+ 
+ /* Set LAST_COMMAND_EXIT_SIGNAL depending on STATUS.  If STATUS is -1, look
