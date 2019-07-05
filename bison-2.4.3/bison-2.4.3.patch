@@ -1,0 +1,98 @@
+# This patch will modify bison-2.4.3 sources obtained from ftp.gnu.org
+# to compile on NEXTSTEP 3.3 with GCC compiler.
+#
+# Apply from bison-2.4.3 parent directory with the following command:
+# patch -p2 <bison-2.4.3.NS33.patch
+#
+# Configured with the following command:
+# bash ./configure -C CC=gcc CFLAGS='-O2'
+# 
+# Ported and tested by t-rexky on m68k NEXTSTEP 3.3 with gcc-3.2.3
+# and other recent GNU tools.
+#
+# build 2011-12-22
+#
+diff -rup bison-2.4.3/lib/mbrtowc.c ../Build/bison-2.4.3/lib/mbrtowc.c
+--- bison-2.4.3/lib/mbrtowc.c	2010-02-06 16:15:26.000000000 -0500
++++ ../Build/bison-2.4.3/lib/mbrtowc.c	2011-12-22 09:32:45.000000000 -0500
+@@ -30,6 +30,9 @@
+ # include "streq.h"
+ # include "verify.h"
+ 
++#ifdef __NeXT__
++#define EILSEQ 92
++#endif /* __NeXT__ */
+ 
+ verify (sizeof (mbstate_t) >= 4);
+ 
+diff -rup bison-2.4.3/lib/sigaction.c ../Build/bison-2.4.3/lib/sigaction.c
+--- bison-2.4.3/lib/sigaction.c	2010-02-06 16:15:26.000000000 -0500
++++ ../Build/bison-2.4.3/lib/sigaction.c	2011-12-22 09:35:47.000000000 -0500
+@@ -52,7 +52,7 @@
+ 
+ /* Check some of our assumptions.  */
+ #if defined SIGCHLD || defined HAVE_SIGALTSTACK || defined HAVE_SIGINTERRUPT
+-# error "Revisit the assumptions made in the sigaction module"
++# warning "Revisit the assumptions made in the sigaction module"
+ #endif
+ 
+ /* Out-of-range substitutes make a good fallback for uncatchable
+diff -rup bison-2.4.3/lib/spawni.c ../Build/bison-2.4.3/lib/spawni.c
+--- bison-2.4.3/lib/spawni.c	2010-02-06 16:15:26.000000000 -0500
++++ ../Build/bison-2.4.3/lib/spawni.c	2011-12-22 09:47:43.000000000 -0500
+@@ -80,6 +80,9 @@
+ # define internal_function /* empty */
+ #endif
+ 
++#ifdef __NeXT__
++#define setpgid setpgrp
++#endif /* __NeXT__ */
+ 
+ /* The Unix standard contains a long explanation of the way to signal
+    an error after the fork() was successful.  Since no new wait status
+diff -rup bison-2.4.3/lib/wait-process.c ../Build/bison-2.4.3/lib/wait-process.c
+--- bison-2.4.3/lib/wait-process.c	2010-02-06 16:15:26.000000000 -0500
++++ ../Build/bison-2.4.3/lib/wait-process.c	2011-12-22 09:26:45.000000000 -0500
+@@ -27,6 +27,15 @@
+ #include <signal.h>
+ 
+ #include <sys/types.h>
++
++#ifdef __NeXT__
++#define WIFSTOPPED(x)	((x).w_stopval == WSTOPPED)
++#define WIFSIGNALED(x)	((x).w_stopval != WSTOPPED && (x).w_termsig != 0)
++#define WIFEXITED(x)	((x).w_stopval != WSTOPPED && (x).w_termsig == 0)
++#define WTERMSIG(s)	((s).w_termsig)
++#define WEXITSTATUS(s)	((s).w_retcode)
++#endif /* __NeXT__ */
++
+ #include <sys/wait.h>
+ 
+ #include "error.h"
+@@ -288,14 +297,24 @@ wait_subprocess (pid_t child, const char
+     }
+ #else
+   /* waitpid() is just as portable as wait() nowadays.  */
+-  int status;
++#ifdef __NeXT__
++  union wait status;
++#define WTERMSIG(s) ((s).w_termsig)
++#define WEXITSTATUS(s) ((s).w_retcode)
++#else
++  int status = 0;
++#endif /* __NeXT__ */
+ 
+   if (termsigp != NULL)
+     *termsigp = 0;
+-  status = 0;
++
+   for (;;)
+     {
++#ifdef __NeXT__
++      int result = wait4((child) == -1 ? 0 : child, &status, 0, 0);
++#else
+       int result = waitpid (child, &status, 0);
++#endif /* __NeXT__ */
+ 
+       if (result != child)
+         {

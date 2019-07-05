@@ -1,0 +1,62 @@
+diff -Naur m4-1.4.6/src/builtin.c m4-1.4.6.patched/src/builtin.c
+--- m4-1.4.6/src/builtin.c	Thu Aug 24 06:43:14 2006
++++ m4-1.4.6.patched/src/builtin.c	Fri Jul  5 13:48:46 2019
+@@ -885,9 +885,7 @@
+ static void
+ m4_sysval (struct obstack *obs, int argc, token_data **argv)
+ {
+-  shipout_int (obs, (sysval == -1 ? 127
+-		     : (M4SYSVAL_EXITBITS (sysval)
+-			| M4SYSVAL_TERMSIGBITS (sysval))));
++  shipout_int (obs, (sysval >> 8) & 0xff);
+ }
+ 
+ /*-------------------------------------------------------------------------.
+diff -Naur m4-1.4.6/src/stackovf.c m4-1.4.6.patched/src/stackovf.c
+--- m4-1.4.6/src/stackovf.c	Thu Aug  3 05:48:45 2006
++++ m4-1.4.6.patched/src/stackovf.c	Fri Jul  5 14:27:46 2019
+@@ -368,17 +368,7 @@
+     ss.ss_sp = stackbuf + SIGSTKSZ;
+     ss.ss_onstack = 0;
+     if (sigstack (&ss, NULL) < 0)
+-      {
+-	/* Oops - sigstack exists but doesn't work.  We can't install
+-	   the overflow detector, but should gracefully treat it as
+-	   though sigstack doesn't exist.  For example, this happens
+-	   when compiled with Linux 2.1 headers but run against Linux
+-	   2.0 kernel.  */
+-	free (stackbuf);
+-	if (errno == ENOSYS)
+-	  return;
+-	error (EXIT_FAILURE, errno, "sigstack");
+-      }
++      error (EXIT_FAILURE, errno, "sigstack");
+   }
+ 
+ #else /* not HAVE_SIGSTACK */
+@@ -398,7 +388,11 @@
+   act.sa_handler = (RETSIGTYPE (*) (int)) sigsegv_handler;
+ # endif /* ! HAVE_STRUCT_SIGACTION_SA_SIGACTION */
+   sigemptyset (&act.sa_mask);
+-  act.sa_flags = (SA_ONSTACK | SA_RESETHAND | SA_SIGINFO);
++  act.sa_flags = (SA_ONSTACK
++#ifdef SA_RESETHAND
++                  | SA_RESETHAND
++#endif
++                  | SA_SIGINFO);
+   if (sigaction (SIGSEGV, &act, NULL) < 0)
+     error (EXIT_FAILURE, errno, "sigaction");
+ 
+@@ -406,7 +400,11 @@
+ 
+   vec.sv_handler = (RETSIGTYPE (*) (int)) sigsegv_handler;
+   vec.sv_mask = 0;
+-  vec.sv_flags = (SV_ONSTACK | SV_RESETHAND);
++  vec.sv_flags = (SV_ONSTACK
++#ifdef SV_RESETHAND
++                  | SV_RESETHAND
++#endif
++                 );
+   if (sigvec (SIGSEGV, &vec, NULL) < 0)
+     error (EXIT_FAILURE, errno, "sigvec");
+ 
