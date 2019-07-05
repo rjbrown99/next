@@ -1,4 +1,4 @@
-# Patches for NeXTStep 3.3
+# Patches for NeXTStep and OpenStep
 
 This archive contains patches to generally available open source software to enable compilation on NeXTStep 3.3 and OpenStep 4.2.
 
