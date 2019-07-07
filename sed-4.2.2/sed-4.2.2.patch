@@ -1,0 +1,17 @@
+diff -Naur sed-4.2.2/lib/regcomp.c sed-4.2.2.patched/lib/regcomp.c
+--- sed-4.2.2/lib/regcomp.c	Sat Dec 22 05:21:52 2012
++++ sed-4.2.2.patched/lib/regcomp.c	Sun Jul  7 16:24:48 2019
+@@ -954,10 +954,10 @@
+ internal_function
+ init_word_char (re_dfa_t *dfa)
+ {
++  int i, j, ch;
++  i = 0;
++  ch = 0;
+   dfa->word_ops_used = 1;
+-  int i = 0;
+-  int j;
+-  int ch = 0;
+   if (BE (dfa->map_notascii == 0, 1))
+     {
+       bitset_word_t bits0 = 0x00000000;
