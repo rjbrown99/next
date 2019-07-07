@@ -1,0 +1,11 @@
+diff -Naur less-530/less.h less-530.patched/less.h
+--- less-530/less.h	Tue Dec  5 14:56:50 2017
++++ less-530.patched/less.h	Sat Jul  6 17:25:25 2019
+@@ -541,3 +541,7 @@
+ void postoa LESSPARAMS ((POSITION, char*));
+ void linenumtoa LESSPARAMS ((LINENUM, char*));
+ void inttoa LESSPARAMS ((int, char*));
++
++#ifndef S_ISREG
++#define S_ISREG(m)      (((m) & S_IFMT) == S_IFREG)
++#endif
