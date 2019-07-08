@@ -7,3 +7,6 @@ While many packages exist in pre-packaged binary form elsewhere, the goal of thi
 Additional packages have been added as needed, such as an implementation of uname.
 
 Contributions are welcome.
+
+Also check out the wiki for compile instructions for other packages that don't require a patch and the preferred installation order.
+https://github.com/rjbrown99/next/wiki/NeXTStep-Software-Ports
